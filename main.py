@@ -7,6 +7,7 @@ from time import sleep
 from supabase import create_client
 import os
 
+
 # Initialize Supabase client using secrets.
 url = st.secrets.url
 key = st.secrets.anon_key
@@ -18,9 +19,12 @@ if os.path.exists(r"/mount/src/solsync-streamlit/images/solsync_logo.png"):
     image_path = r"/mount/src/solsync-streamlit/images/solsync_logo.png"
 else:
     # Path for local machine
-    image_path = r"/images/solsync_logo.png"
+    # Get the current working directory
+    current_directory = os.getcwd()
+    # Merge with the relative path of the image
+    image_path = os.path.join(current_directory, "images", "solsync_logo.png")
 # Open the image
-image = Image.open(image_path)
+image_array = Image.open(image_path)
 
 def main():
     st.set_page_config(page_title="SolSync", page_icon="🔆", layout="wide")
