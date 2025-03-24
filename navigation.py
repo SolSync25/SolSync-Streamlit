@@ -374,7 +374,6 @@ def alarms(supabase, device_filter):
 
     Rn = supabase.table("SOH").select("Rn").eq("inverter_id",device_filter).execute()
     Rn = Rn.data[0]['Rn']
-    st.write(Rn)
     if Rn is not None and Rn != 0:
         with st.expander("press to View Battery Health"):
             st.subheader("State of health (SOH)")
