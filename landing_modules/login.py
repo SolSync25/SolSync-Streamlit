@@ -106,109 +106,110 @@ def signup(supabase):
     # Reset error flags at the start of the sign-up form.
     utils.reset_error_flags()
     
-    # Layout for Email and Username.
-    col1, col2 = st.columns(2, vertical_alignment="center")
-    with col1:
-        email = st.text_input("Email*", placeholder="john.doe@example.com").strip()
-    with col2:
-        username = st.text_input("Username*", placeholder="JohnDoe").strip()
-    
-    # Layout for Inverter ID and PIN Code.
-    col3, col4 = st.columns(2, vertical_alignment="center")
-    with col3:
-        inverter_id = st.text_input("Inverter ID*", placeholder="inv###", max_chars=6).strip()
-    with col4:
-        pin_code = st.text_input("PIN Code*", placeholder="####", max_chars=4).strip()
-    
-    # Layout for Password and Confirm Password.
-    col5, col6 = st.columns(2, vertical_alignment="center")
-    with col5:
-        password = st.text_input("Password*", type="password").strip()
-    with col6:
-        confirm_password = st.text_input("Confirm Password*", type="password").strip()
-    
-    if st.button("Sign Up", use_container_width=True):
-        # Validate that all required fields are filled.
-        fields_filled = all([username, password, email, inverter_id, pin_code])
-        st.session_state['flags']['missing_data'] = not fields_filled
+    with st.form("SU", border=False):
+        # Layout for Email and Username.
+        col1, col2 = st.columns(2, vertical_alignment="center")
+        with col1:
+            email = st.text_input("Email*", placeholder="john.doe@example.com").strip()
+        with col2:
+            username = st.text_input("Username*", placeholder="JohnDoe").strip()
         
-        # Field-specific validations.
-        if email and not utils.is_valid_email(email):
-            st.session_state['flags']['invalid_email'] = True
+        # Layout for Inverter ID and PIN Code.
+        col3, col4 = st.columns(2, vertical_alignment="center")
+        with col3:
+            inverter_id = st.text_input("Inverter ID*", placeholder="inv###", max_chars=6).strip()
+        with col4:
+            pin_code = st.text_input("PIN Code*", placeholder="####", max_chars=4).strip()
         
-        if inverter_id and not utils.is_valid_inverter_id(inverter_id):
-            st.session_state['flags']['invalid_inverter_id'] = True
+        # Layout for Password and Confirm Password.
+        col5, col6 = st.columns(2, vertical_alignment="center")
+        with col5:
+            password = st.text_input("Password*", type="password").strip()
+        with col6:
+            confirm_password = st.text_input("Confirm Password*", type="password").strip()
         
-        if pin_code and not utils.is_valid_pin_code(pin_code):
-            st.session_state['flags']['invalid_pin_code'] = True
-        
-        if password and len(password) < 8:
-            st.session_state['flags']['password_too_short'] = True
-        
-        if password and confirm_password and (password != confirm_password):
-            st.session_state['flags']['passwords_do_not_match'] = True
-        
-        # If any flag validations fail, do not proceed.
-        if any(st.session_state['flags'].values()):
-            return
-        
-        # **Inverter Validation Step:**
-        # Verify the provided inverter_id exists and that the provided pin_code matches
-        # the company record before creating a new user.
-        try:
-            inverter_data_response = supabase.table("company_inverters") \
-                .select("inverter_id", "pin_code") \
-                .eq("inverter_id", inverter_id) \
-                .execute()
+        if st.form_submit_button("Sign Up", use_container_width=True):
+            # Validate that all required fields are filled.
+            fields_filled = all([username, password, email, inverter_id, pin_code])
+            st.session_state['flags']['missing_data'] = not fields_filled
             
-            if not inverter_data_response.data:
-                st.session_state['flags']['inverter_wrong_info'] = True
-                st.error("Provided Inverter ID does not exist in our records.")
+            # Field-specific validations.
+            if email and not utils.is_valid_email(email):
+                st.session_state['flags']['invalid_email'] = True
+            
+            if inverter_id and not utils.is_valid_inverter_id(inverter_id):
+                st.session_state['flags']['invalid_inverter_id'] = True
+            
+            if pin_code and not utils.is_valid_pin_code(pin_code):
+                st.session_state['flags']['invalid_pin_code'] = True
+            
+            if password and len(password) < 8:
+                st.session_state['flags']['password_too_short'] = True
+            
+            if password and confirm_password and (password != confirm_password):
+                st.session_state['flags']['passwords_do_not_match'] = True
+            
+            # If any flag validations fail, do not proceed.
+            if any(st.session_state['flags'].values()):
                 return
             
-            company_inverter = inverter_data_response.data[0]
-            
-            # Compare the entered PIN with the company's record.
-            if not utils.verify_value(pin_code, company_inverter['pin_code']):
-                st.session_state['flags']['inverter_wrong_info'] = True
-                st.error("Provided PIN Code does not match our records for the given Inverter ID.")
-                return
-        except Exception as e:
-            st.error(f"Error accessing company inverter data: {e}")
-            return
-        
-        # Proceed with user registration.
-        try:
-            response = supabase.table("user_authentication").insert({
-                "username": username,
-                "password": utils.hash_value(password),
-                "email": email,
-            }).execute()
-            
-            if response.data and len(response.data) > 0:
-                new_user = response.data[0]
-                user_id = new_user['id']  # The id of the newly registered user.
-                
-                # **Link the User with the Inverter:**
-                # Update the company_inverters table to link this inverter with the new user.
-                link_response = supabase.table("company_inverters") \
-                    .update({"user_id": user_id}) \
+            # **Inverter Validation Step:**
+            # Verify the provided inverter_id exists and that the provided pin_code matches
+            # the company record before creating a new user.
+            try:
+                inverter_data_response = supabase.table("company_inverters") \
+                    .select("inverter_id", "pin_code") \
                     .eq("inverter_id", inverter_id) \
                     .execute()
                 
-                if not (link_response.data and len(link_response.data) > 0):
-                    st.error("Failed to link your account with the inverter. Please try again later.")
+                if not inverter_data_response.data:
+                    st.session_state['flags']['inverter_wrong_info'] = True
+                    st.error("Provided Inverter ID does not exist in our records.")
                     return
                 
-                st.session_state['flags']['sign_up_success'] = True
-                # Optionally, switch to the Sign In view after successful registration.
-                st.session_state['is_signin'] = True
-                st.session_state['toggle_label'] = "Sign Up"
-                st.session_state['toggle_text'] = "Don't have an account?"
-                sleep(2)
-                st.rerun()
-        except APIError as e:
-            st.session_state['flags']['user_already_exists'] = True
+                company_inverter = inverter_data_response.data[0]
+                
+                # Compare the entered PIN with the company's record.
+                if not utils.verify_value(pin_code, company_inverter['pin_code']):
+                    st.session_state['flags']['inverter_wrong_info'] = True
+                    st.error("Provided PIN Code does not match our records for the given Inverter ID.")
+                    return
+            except Exception as e:
+                st.error(f"Error accessing company inverter data: {e}")
+                return
+            
+            # Proceed with user registration.
+            try:
+                response = supabase.table("user_authentication").insert({
+                    "username": username,
+                    "password": utils.hash_value(password),
+                    "email": email,
+                }).execute()
+                
+                if response.data and len(response.data) > 0:
+                    new_user = response.data[0]
+                    user_id = new_user['id']  # The id of the newly registered user.
+                    
+                    # **Link the User with the Inverter:**
+                    # Update the company_inverters table to link this inverter with the new user.
+                    link_response = supabase.table("company_inverters") \
+                        .update({"user_id": user_id}) \
+                        .eq("inverter_id", inverter_id) \
+                        .execute()
+                    
+                    if not (link_response.data and len(link_response.data) > 0):
+                        st.error("Failed to link your account with the inverter. Please try again later.")
+                        return
+                    
+                    st.session_state['flags']['sign_up_success'] = True
+                    # Optionally, switch to the Sign In view after successful registration.
+                    st.session_state['is_signin'] = True
+                    st.session_state['toggle_label'] = "Sign Up"
+                    st.session_state['toggle_text'] = "Don't have an account?"
+                    sleep(2)
+                    st.rerun()
+            except APIError as e:
+                st.session_state['flags']['user_already_exists'] = True
 
 # --- Placeholder for sign-in function ---
 def signin(supabase):
@@ -217,9 +218,10 @@ def signin(supabase):
     utils.reset_error_flags()
     
     # Layout for Sign In.
-    email = st.text_input("Email", placeholder="john.doe@example.com").strip()
-    password = st.text_input("Password", type="password").strip()
-    login_button = st.button("Sign In", use_container_width=True)
+    with st.form("SI", border=False):
+        email = st.text_input("Email", placeholder="john.doe@example.com").strip()
+        password = st.text_input("Password", type="password").strip()
+        login_button = st.form_submit_button("Sign In", use_container_width=True)
     col1, col2 = st.columns([0.6, 0.4], vertical_alignment="center")
     remember_me = col1.checkbox("Remember Me")
     st.session_state['remember_me'] = remember_me
