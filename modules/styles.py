@@ -25,7 +25,7 @@ container="""
         background-color: #ff2b2b;
         text-align: center;
         text-align-last: center;
-        padding: 15% 10px;
+        padding: 17% 10px;
         border-radius: 5px;
     }
     </style>
