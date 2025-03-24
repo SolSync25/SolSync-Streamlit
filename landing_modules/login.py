@@ -1,9 +1,9 @@
 import streamlit as st
-import styles
+import modules.styles as styles
 from postgrest.exceptions import APIError
 from time import sleep
-import utils
-import js_utils
+import modules.utils as utils
+import modules.js_utils as js_utils
 
 def login(supabase):
     # Initialize session state values if not already set.
