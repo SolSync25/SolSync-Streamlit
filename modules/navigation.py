@@ -1,12 +1,10 @@
 import streamlit as st
 import pandas as pd
-import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime, timedelta, timezone
-import random
-import utils
-import js_utils
-from time import sleep, strftime
+import modules.utils as utils
+import modules.js_utils as js_utils
+from time import sleep
 from postgrest.exceptions import APIError
 
 def overview(data_table, delta, AL1, AL2):
