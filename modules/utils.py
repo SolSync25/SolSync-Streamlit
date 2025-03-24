@@ -12,7 +12,7 @@ import random
 import skfuzzy as fuzz
 import numpy as np
 import plotly.graph_objects as go
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 def str_to_flags(input_str, flags_list):
     """
