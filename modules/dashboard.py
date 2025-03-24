@@ -1,6 +1,5 @@
 import streamlit as st
 from PIL import Image
-import numpy as np
 import modules.js_utils as js_utils
 from modules.navigation import overview, commands, alarms, account
 from modules.utils import get_from_database, get_from_alarms
