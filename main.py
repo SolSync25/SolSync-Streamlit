@@ -2,6 +2,7 @@ import streamlit as st
 from PIL import Image
 
 def home():
+    st.set_page_config(page_title="SolSync", page_icon="🔆", layout="wide")
     st.markdown("<h2 style='text-align: center; color: gray;'>Navigate Your Solar Future</h2>", unsafe_allow_html=True)
     st.write(
         """
