@@ -20,7 +20,7 @@ else:
     # Path for local machine
     image_path = r"./images/solsync_logo.png"
 # Convert the image to a NumPy array
-image_array = np.array(image)
+image_array = np.array(image_path)
 
 def main():
     st.set_page_config(page_title="SolSync", page_icon="🔆", layout="wide")
