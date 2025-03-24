@@ -1,102 +1,113 @@
 import streamlit as st
+from modules import home as Home, pricing, products, login
+from dashboard import *
 from PIL import Image
+import js_utils
+from time import sleep
+from supabase import create_client
 
-def home():
+# Initialize Supabase client using secrets.
+url = st.secrets.url
+key = st.secrets.anon_key
+supabase = create_client(url, key)
+
+# Open the image file
+image = Image.open("solsync_logo.png")  # Replace with the path to your image
+# Convert the image to a NumPy array
+image_array = np.array(image)
+
+def main():
     st.set_page_config(page_title="SolSync", page_icon="🔆", layout="wide")
-    st.markdown("<h2 style='text-align: center; color: gray;'>Navigate Your Solar Future</h2>", unsafe_allow_html=True)
-    st.write(
-        """
-        Your smart solution to monitor and control your solar inverters.
-        Experience real-time insights, streamlined management, and unmatched control over your renewable energy systems.
-        """
-    )
+    if 'title' not in st.session_state:
+        st.session_state['title'] = "Home"
+    
+    inv1, inv2, inv3, inv4, inv5 = st.columns([0.35,0.1,0.1,0.1,0.35], vertical_alignment='center')
 
-    # --------------------------------------------------------------------------------
-    # HERO SECTION: Title, Tagline, and Main Visual
-    # --------------------------------------------------------------------------------
-    # If you have a hero image or banner, display it here.
-    try:
-        hero_image = Image.open("hero.jpg")  # Replace with path to your banner image.
-        st.image(hero_image, use_container_width=True)
-    except Exception:
-        st.info("Hero image not found. Add 'hero.jpg' in your project directory.")
+    with inv1:
+        st.image(image_array, width=200)
+    # Load stored sign-in status and convert to boolean robustly.
+    with inv2:
+        session_value_raw = js_utils.load_from_session_storage("is_signed")
+    session_value = session_value_raw.lower() == "true" if session_value_raw and isinstance(session_value_raw, str) else False
 
-    # --------------------------------------------------------------------------------
-    # BENEFITS SECTION: Why Choose SunPilot?
-    # --------------------------------------------------------------------------------
-    st.markdown("## Why Choose SolSync?")
-    st.markdown(
-        """
-        - **Real-Time Monitoring:** Stay informed with live data on energy production and system performance.
-        - **Intuitive Inverter Management:** Easily add, configure, and control your solar inverters.
-        - **Data-Driven Decisions:** Leverage powerful analytics and historical data to optimize your energy use.
-        - **Robust Security:** Enjoy peace of mind with industry-level security for all your data.
-        """,)
+    # Load access token (for "remember me") and user email (if available) from storage.
+    with inv3:
+        local_value = js_utils.load_from_local_storage("access_token")
+    with inv4:
+        user_email = js_utils.load_from_session_storage("user_email")  # Ensure you save this during login
 
-    # --------------------------------------------------------------------------------
-    # HOW IT WORKS SECTION: A Simple 3-Step Process
-    # --------------------------------------------------------------------------------
-    st.markdown("## How It Works")
-    st.markdown(
-        """
-        **1. Sign Up & Connect:**  
-        Get started by creating an account and linking your solar inverter with our guided setup.
+    sleep(0.5)
+    
+    # If the user is signed in either via the session flag or via a persistent token.
+    if session_value or (local_value and local_value.strip() != ""):
+        if 'user_id' not in st.session_state:
+            # Use the access token if available; otherwise, lookup by email.
+            if local_value and local_value.strip() != "":
+                data = supabase.table("user_authentication").select("id", "username").eq("access_token", local_value).execute()
+            elif user_email and user_email.strip() != "":
+                data = supabase.table("user_authentication").select("id", "username").eq("email", user_email).execute()
+            else:
+                st.error("User identifier missing.")
+                return
 
-        **2. Monitor:**  
-        Access a rich, real-time dashboard that visualizes both live performance and historical trends.
+            if data.data and len(data.data) > 0:
+                st.session_state['user_id'] = data.data[0]['id']
+                st.session_state['username'] = data.data[0]['username']
 
-        **3. Control & Optimize:**  
-        Remotely send commands to adjust settings, perform resets, or calibrate your system for peak efficiency.
-        """
-    )
+            else:
+                st.error("Could not retrieve user ID from the database.")
+                return
+            
+        dashboard(user_id=st.session_state['user_id'], username=st.session_state['username'], supabase=supabase)
+    
+    else:
+        # Create a dictionary of pages.
+        pages = {
+            "Home": Home.home,
+            "Products": products.products,
+            "Pricing": pricing.pricing,
+            "Login": login.login
+        }
+        page_selection = [pages["Home"],
+                          pages["Products"],
+                          pages["Pricing"],
+                          pages["Login"]]
 
-    # Optionally, include an informative graphic illustrating these steps.
-    try:
-        workflow_image = Image.open("workflow_diagram.png")  # Replace with a workflow diagram image.
-        st.image(workflow_image, caption="A streamlined workflow for harnessing your solar power", width=1000)
-    except Exception:
-        st.info("Workflow diagram image not found. Consider adding 'workflow_diagram.png'.")
+        if 'page' not in st.session_state:
+            st.session_state['page'] = 0
 
-    # --------------------------------------------------------------------------------
-    # SUCCESS STORIES SECTION: Testimonials & Social Proof
-    # --------------------------------------------------------------------------------
-    st.markdown("## Success Stories")
-    st.markdown(
-        """
-        > "SolSync transformed the way I manage my solar system. The interface is seamless and the real-time data is a game changer!"  
-        > *– Alex M.*
+        # --------------------------------------------------------------------------------
+        # HEADER SECTION
+        # --------------------------------------------------------------------------------
+        with inv5:
+            col1, col2, col3, col4 = st.columns(4, vertical_alignment="center")
 
-        > "The analytics provided by SolSync helped me optimize my energy usage and cut down on costs. I can't imagine going back."  
-        > *– Jamie T.*
-        """
-    )
+            with col1:
+                if st.button("Home", use_container_width=True):
+                    st.session_state['title'] = "Home"
+                    st.session_state['page'] = 0
+                    st.rerun()
+            with col2:
+                if st.button("Products", use_container_width=True):
+                    st.session_state['title'] = "Products"
+                    st.session_state['page'] = 1
+                    st.rerun()
+            with col3:
+                if st.button("Pricing", use_container_width=True):
+                    st.session_state['title'] = "Pricing"
+                    st.session_state['page'] = 2
+                    st.rerun()
+            with col4:
+                if st.button("Account", use_container_width=True):
+                    st.session_state['title'] = "Account"
+                    st.session_state['page'] = 3
+                    st.rerun()
 
-    # --------------------------------------------------------------------------------
-    # CALL-TO-ACTION SECTION: Invite Visitors to Take the Next Step
-    # --------------------------------------------------------------------------------
-    st.markdown("## Ready to Embrace the Future of Energy?")
-    st.write(
-        """
-        At SolSync, we believe every ray of sunlight is an opportunity. With our innovative approach, your solar journey can be as efficient
-        and empowering as possible.
-        """
-    )
-    if st.button("Get Started for Free"):
-        # This is a placeholder for your sign-up redirection logic
-        st.session_state['page'] = 3
-        st.rerun()
+        # Render the selected page.
+        if st.session_state['page'] == 3:
+            page_selection[st.session_state['page']](supabase)
+        else:
+            page_selection[st.session_state['page']]()
 
-    # --------------------------------------------------------------------------------
-    # FINAL STATEMENT: Vision Statement / Inspiration
-    # --------------------------------------------------------------------------------
-    st.markdown("### Navigate, Monitor, and Master Your Solar Energy")
-    st.write(
-        """
-        **SolSync** puts you in complete control of your renewable energy portfolio. Embrace smarter energy management
-        and join the movement towards a more sustainable future.
-        """
-    )
-
-# Ensure the app runs only when executed directly
 if __name__ == "__main__":
-    home()
+    main()
