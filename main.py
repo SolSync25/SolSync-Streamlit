@@ -1,8 +1,8 @@
 import streamlit as st
-from modules import home as Home, pricing, products, login
-from dashboard import *
+from landing_modules import home as Home, pricing, products, login
+from modules.dashboard import *
 from PIL import Image
-import js_utils
+import modules.js_utils as js_utils
 from time import sleep
 from supabase import create_client
 
