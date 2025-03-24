@@ -7,16 +7,19 @@ from modules.utils import get_from_database, get_from_alarms
 import time
 import os
 
+
 # Check if running on Streamlit Cloud or locally
 if os.path.exists(r"/mount/src/solsync-streamlit/images/solsync_logo.png"):
     # Path for Streamlit Cloud
     image_path = r"/mount/src/solsync-streamlit/images/solsync_logo.png"
 else:
     # Path for local machine
-    image_path = r"./images/solsync_logo.png"
-# Convert the image to a NumPy array
-# Convert the image to a NumPy array
-image_array = np.array(image_path)
+    # Get the current working directory
+    current_directory = os.getcwd()
+    # Merge with the relative path of the image
+    image_path = os.path.join(current_directory, "images", "solsync_logo.png")
+# Open the image
+image_array = Image.open(image_path)
 
 selected_columns = ['grid_voltage_input', 'grid_frequency_input',
                     'ac_output_voltage', 'ac_output_frequency',
