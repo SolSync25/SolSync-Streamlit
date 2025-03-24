@@ -371,15 +371,38 @@ def alarms(supabase, device_filter):
     
     # fuzzy:
     st.write("---")
-    st.subheader("Fuzzy Expert System")
+
     Rn = supabase.table("SOH").select("Rn").eq("inverter_id",device_filter).execute()
     Rn = Rn.data[0]['Rn']
     if Rn is not None and Rn != 0:
-        output_value, memberships = utils.sugeno_inference(float(Rn))
-        st.write(round(output_value, 2))
-        max_value = max(memberships)
-        max_index = memberships.index(max_value)
-        st.write(utils.battery_state[max_index])
+        with st.expander("press to View Battery Health"):
+            st.subheader("State of health (SOH)")
+            output_value, memberships = utils.sugeno_inference(float(Rn))
+            max_value = max(memberships)
+            max_index = memberships.index(max_value)
+            utils.battery_wdg(output_value)
+
+
+
+    # Display the Plotly chart
+    data = supabase.table("SOH").select("statistics_ready", "statistics_ready_date", "Cday_copy", "Pday_copy").eq("inverter_id", device_filter).execute()
+    # Convert the given timestamp to a datetime object
+    data_cheak = len(data.data[0]['Pday_copy'])
+    if data_cheak > 0:
+        with st.expander("press to View Statistics"):
+            st.subheader("Total Statistics Display")
+            utc_time = datetime.fromisoformat(data.data[0]['statistics_ready_date'])
+            # Define GMT+3 timezone
+            gmt_plus_three = timezone(timedelta(hours=3))
+            # Convert UTC time to GMT+3
+            local_time = utc_time.astimezone(gmt_plus_three)
+            # Format the time to "YYYY-MM-DD HH:MM:SS"
+            timeing = local_time.strftime("%Y-%m-%d %H:%M:%S")
+            date = utils.get_last_30_days(datetime.strptime(timeing, "%Y-%m-%d %H:%M:%S"))
+            fig = utils.create_plotly_chart_power(date, data.data[0]['Pday_copy'], timeing)
+            fig2 = utils.create_plotly_chart_dcc(date, data.data[0]['Cday_copy'], timeing)
+            st.plotly_chart(fig, use_container_width=True, key="plot1")
+            st.plotly_chart(fig2, use_container_width=True, key="plot2")
 
 
 def account(supabase, user_id, inverter_ids):
