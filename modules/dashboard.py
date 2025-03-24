@@ -1,10 +1,9 @@
 import streamlit as st
-import pandas as pd
 from PIL import Image
 import numpy as np
-import js_utils
-from navigation import overview, commands, alarms, account
-from utils import get_from_database, get_from_alarms
+import modules.js_utils as js_utils
+from modules.navigation import overview, commands, alarms, account
+from modules.utils import get_from_database, get_from_alarms
 import time
 
 # Open the image file
