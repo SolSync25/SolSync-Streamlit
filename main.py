@@ -16,7 +16,7 @@ def home():
     # If you have a hero image or banner, display it here.
     try:
         hero_image = Image.open("hero.jpg")  # Replace with path to your banner image.
-        st.image(hero_image, use_column_width=True)
+        st.image(hero_image, use_container_width=True)
     except Exception:
         st.info("Hero image not found. Add 'hero.jpg' in your project directory.")
 
