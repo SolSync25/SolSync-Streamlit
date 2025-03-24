@@ -73,7 +73,8 @@ def home():
             # Merge with the relative path of the image
             image_path = os.path.join(current_directory, "images", "workflow_diagram.png")
         # Open the image
-        st.image(Image.open(image_path))
+        _, col, _ = st.columns([0.2, 0.6, 0.2])
+        col.image(Image.open(image_path))
     except Exception:
         st.info("Workflow diagram image not found. Consider adding '.\images\workflow_diagram.png'.")
 
