@@ -5,14 +5,20 @@ from PIL import Image
 import modules.js_utils as js_utils
 from time import sleep
 from supabase import create_client
+import os
 
 # Initialize Supabase client using secrets.
 url = st.secrets.url
 key = st.secrets.anon_key
 supabase = create_client(url, key)
 
-# Open the image file
-image = Image.open(r"/mount/src/solsync-streamlit/images/solsync_logo.png")  # Replace with the path to your image
+# Check if running on Streamlit Cloud or locally
+if os.path.exists(r"/mount/src/solsync-streamlit/images/solsync_logo.png"):
+    # Path for Streamlit Cloud
+    image_path = r"/mount/src/solsync-streamlit/images/solsync_logo.png"
+else:
+    # Path for local machine
+    image_path = r"./images/solsync_logo.png"
 # Convert the image to a NumPy array
 image_array = np.array(image)
 
