@@ -36,7 +36,7 @@ def main():
     with inv4:
         user_email = js_utils.load_from_session_storage("user_email")  # Ensure you save this during login
 
-    sleep(5)
+    sleep(2)
     
     # If the user is signed in either via the session flag or via a persistent token.
     if session_value or (local_value and local_value.strip() != ""):
