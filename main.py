@@ -12,7 +12,7 @@ key = st.secrets.anon_key
 supabase = create_client(url, key)
 
 # Open the image file
-image = Image.open("solsync_logo.png")  # Replace with the path to your image
+image = Image.open(".\images\solsync_logo.png")  # Replace with the path to your image
 # Convert the image to a NumPy array
 image_array = np.array(image)
 
