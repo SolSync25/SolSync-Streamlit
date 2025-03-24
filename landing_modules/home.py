@@ -1,5 +1,6 @@
 import streamlit as st
 from PIL import Image
+import os
 
 def home():
     st.markdown("<h2 style='text-align: center; color: gray;'>Navigate Your Solar Future</h2>", unsafe_allow_html=True)
@@ -15,8 +16,18 @@ def home():
     # --------------------------------------------------------------------------------
     # If you have a hero image or banner, display it here.
     try:
-        hero_image = Image.open(r"/mount/src/solsync-streamlit/images/hero.jpg")  # Replace with path to your banner image.
-        st.image(hero_image, use_container_width=True)
+        # Check if running on Streamlit Cloud or locally
+        if os.path.exists(r"/mount/src/solsync-streamlit/images/hero.jpg"):
+            # Path for Streamlit Cloud
+            image_path = r"/mount/src/solsync-streamlit/images/hero.jpg"
+        else:
+            # Path for local machine
+            # Get the current working directory
+            current_directory = os.getcwd()
+            # Merge with the relative path of the image
+            image_path = os.path.join(current_directory, "images", "hero.jpg")
+        # Open the image
+        st.image(Image.open(image_path))
     except Exception:
         st.info("Hero image not found. Add 'hero.jpg' in your project directory.")
 
@@ -51,8 +62,18 @@ def home():
 
     # Optionally, include an informative graphic illustrating these steps.
     try:
-        workflow_image = Image.open(r"/mount/src/solsync-streamlit/images/workflow_diagram.png")  # Replace with a workflow diagram image.
-        st.image(workflow_image, caption="A streamlined workflow for harnessing your solar power", width=1000)
+        # Check if running on Streamlit Cloud or locally
+        if os.path.exists(r"/mount/src/solsync-streamlit/images/workflow_diagram.png"):
+            # Path for Streamlit Cloud
+            image_path = r"/mount/src/solsync-streamlit/images/workflow_diagram.png"
+        else:
+            # Path for local machine
+            # Get the current working directory
+            current_directory = os.getcwd()
+            # Merge with the relative path of the image
+            image_path = os.path.join(current_directory, "images", "workflow_diagram.png")
+        # Open the image
+        st.image(Image.open(image_path))
     except Exception:
         st.info("Workflow diagram image not found. Consider adding '.\images\workflow_diagram.png'.")
 
