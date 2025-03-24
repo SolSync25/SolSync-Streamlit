@@ -18,9 +18,9 @@ if os.path.exists(r"/mount/src/solsync-streamlit/images/solsync_logo.png"):
     image_path = r"/mount/src/solsync-streamlit/images/solsync_logo.png"
 else:
     # Path for local machine
-    image_path = r"./images/solsync_logo.png"
-# Convert the image to a NumPy array
-image_array = np.array(image_path)
+    image_path = r"/images/solsync_logo.png"
+# Open the image
+image = Image.open(image_path)
 
 def main():
     st.set_page_config(page_title="SolSync", page_icon="🔆", layout="wide")
