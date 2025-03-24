@@ -11,6 +11,8 @@ import pandas as pd
 import random
 import skfuzzy as fuzz
 import numpy as np
+import plotly.graph_objects as go
+from datetime import datetime, timedelta
 
 def str_to_flags(input_str, flags_list):
     """
@@ -451,3 +453,105 @@ def count_ones_in_hex(hex_string):
         return ones_count
     except ValueError:
         return "Invalid input! Please provide a string in the format '\\xNN'."
+
+
+# Create a simple Plotly graph
+def create_plotly_chart_power(dayes, power, date):
+    # Sample data
+
+    x = dayes
+    y = power
+
+    # Create a Plotly figure
+    fig = go.Figure()
+
+    # Add a line trace
+    fig.add_trace(go.Scatter(
+        x=x,
+        y=y,
+        mode='lines+markers',
+        name='Daily Usage',
+        line=dict(color='#ff2b2b'),      # Set line color to #ff2b2b
+        marker=dict(color='#ff2b2b')    # Set marker color to #ff2b2b
+    ))
+    # Customize layout
+    fig.update_layout(
+        title=f"Power Usage in the Latest 30 Days from : {date}",
+        xaxis_title="Date",
+        yaxis_title="Power %",
+        template="plotly_white",
+        xaxis=dict(tickangle=45)
+    )
+
+    return fig
+
+# Create a simple Plotly graph
+def create_plotly_chart_dcc(dayes, power, date):
+    # Sample data
+
+    x = dayes
+    y = power
+
+    # Create a Plotly figure
+    fig = go.Figure()
+
+    # Add a line trace
+    fig.add_trace(go.Scatter(
+        x=x,
+        y=y,
+        mode='lines+markers',
+        name='Daily Usage',
+        line=dict(color='#04B3D4'),      # Set line color to #ff2b2b
+        marker=dict(color='#04B3D4')    # Set marker color to #ff2b2b
+    ))
+    # Customize layout
+    fig.update_layout(
+        title=f"Full discharge cycles in the Latest 30 Days from : {date}",
+        xaxis_title="Date",
+        yaxis_title="Full discharge cycles",
+        template="plotly_white",
+        xaxis=dict(tickangle=45)
+    )
+
+    return fig
+
+
+def get_last_30_days(start_date):
+    last_30_days = [(start_date - timedelta(days=i)).strftime('%y-%m-%d') for i in range(30)]
+    return last_30_days[::-1]  # Reverse to make the oldest date first
+
+
+def battery_wdg(fuzzy_output):
+    # Get the battery state and color
+    fuzzy_output *= 100
+    fuzzy_output = round(fuzzy_output,2)
+    # Data for battery health statuses
+    battery_health = [
+        {"state": "Healthy", "min": 90, "max": 100, "color": "green", "icon": "🔋", "description": "Your battery is in excellent condition and performing optimally!"},
+        {"state": "Accepted", "min": 70, "max": 90, "color": "blue", "icon": "🔵", "description": "Your battery is in acceptable condition. It is working fine but could be improved."},
+        {"state": "Weak", "min": 58, "max": 70, "color": "orange", "icon": "🟠", "description": "Your battery is weak. Performance is noticeably degraded. Maintenance is advised."},
+        {"state": "Bad", "min": 0, "max": 58, "color": "red", "icon": "🟥", "description": "Your battery is in bad condition! Immediate replacement is strongly recommended."},
+    ]
+
+
+    # Match the input percentage to the corresponding health state
+    matched_health = next(
+        (item for item in battery_health if item["min"] <= fuzzy_output <= item["max"]),
+        None
+    )
+
+    # Display the matched battery health status
+    if matched_health:
+        st.markdown(
+            f"""
+            <div style="border: 2px solid {matched_health['color']}; border-radius: 10px; padding: 20px; text-align: center;">
+                <span style="font-size: 48px;">{matched_health['icon']}</span><br>
+                <h2 style="color: {matched_health['color']};">{matched_health['state']}</h2>
+                <p>{matched_health['description']}</p>
+                <p><b>Battery Health:</b> {fuzzy_output}%</p>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+    else:
+        st.error("Battery status could not be determined.")
