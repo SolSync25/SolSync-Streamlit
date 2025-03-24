@@ -5,11 +5,18 @@ import modules.js_utils as js_utils
 from modules.navigation import overview, commands, alarms, account
 from modules.utils import get_from_database, get_from_alarms
 import time
+import os
 
-# Open the image file
-image = Image.open(r"/mount/src/solsync-streamlit/images/solsync_logo.png")  # Replace with the path to your image
+# Check if running on Streamlit Cloud or locally
+if os.path.exists(r"/mount/src/solsync-streamlit/images/solsync_logo.png"):
+    # Path for Streamlit Cloud
+    image_path = r"/mount/src/solsync-streamlit/images/solsync_logo.png"
+else:
+    # Path for local machine
+    image_path = r"./images/solsync_logo.png"
 # Convert the image to a NumPy array
-image_array = np.array(image)
+# Convert the image to a NumPy array
+image_array = np.array(image_path)
 
 selected_columns = ['grid_voltage_input', 'grid_frequency_input',
                     'ac_output_voltage', 'ac_output_frequency',
