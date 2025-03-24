@@ -7,7 +7,7 @@ from modules.utils import get_from_database, get_from_alarms
 import time
 
 # Open the image file
-image = Image.open(".\images\solsync_logo.png")  # Replace with the path to your image
+image = Image.open(r".\images\solsync_logo.png")  # Replace with the path to your image
 # Convert the image to a NumPy array
 image_array = np.array(image)
 
