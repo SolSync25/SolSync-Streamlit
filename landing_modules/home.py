@@ -15,7 +15,7 @@ def home():
     # --------------------------------------------------------------------------------
     # If you have a hero image or banner, display it here.
     try:
-        hero_image = Image.open("hero.jpg")  # Replace with path to your banner image.
+        hero_image = Image.open(".\images\hero.jpg")  # Replace with path to your banner image.
         st.image(hero_image, use_container_width=True)
     except Exception:
         st.info("Hero image not found. Add 'hero.jpg' in your project directory.")
@@ -51,10 +51,10 @@ def home():
 
     # Optionally, include an informative graphic illustrating these steps.
     try:
-        workflow_image = Image.open("workflow_diagram.png")  # Replace with a workflow diagram image.
+        workflow_image = Image.open(".\images\workflow_diagram.png")  # Replace with a workflow diagram image.
         st.image(workflow_image, caption="A streamlined workflow for harnessing your solar power", width=1000)
     except Exception:
-        st.info("Workflow diagram image not found. Consider adding 'workflow_diagram.png'.")
+        st.info("Workflow diagram image not found. Consider adding '.\images\workflow_diagram.png'.")
 
     # --------------------------------------------------------------------------------
     # SUCCESS STORIES SECTION: Testimonials & Social Proof
