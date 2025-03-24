@@ -38,7 +38,7 @@ def login(supabase):
     
     # Apply custom CSS styles from your styles module.
     st.markdown(styles.container, unsafe_allow_html=True)
-    st.markdown(styles.button_dark, unsafe_allow_html=True)
+    # st.markdown(styles.button_dark, unsafe_allow_html=True)
     # st.markdown(styles.button_light, unsafe_allow_html=True)
 
     # Main container.
@@ -51,9 +51,13 @@ def login(supabase):
                 signup(supabase)
         with col2:
             with st.container(key="col2"):
-                st.header("Welcome to SolSync")
-                st.write(st.session_state['toggle_text'])
-                if st.button(st.session_state['toggle_label']):
+                st.markdown(
+                f"<h1 style='color:white; text-align:center;'>Welcome to SolSync</h1>",
+                unsafe_allow_html=True)
+                st.markdown(
+                f"<p style='color:white; text-align:center;'>{st.session_state['toggle_text']}</p>",
+                unsafe_allow_html=True)
+                if st.button(st.session_state['toggle_label'], type='primary'):
                     # Toggle between Sign In and Sign Up.
                     st.session_state['is_signin'] = not st.session_state['is_signin']
                     if st.session_state['is_signin']:
